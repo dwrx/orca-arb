@@ -8,8 +8,8 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 
 const SLIPPAGE = 0.015;
 const ARB_THRESHOLD = 0.0103;
-const RETRY_AMOUNT = 1;
-const INIT_ROUGH_AMOUNT = 1;
+const RETRY_TIMES = 10;
+const INIT_ROUGH_AMOUNT = 0.2;
 
 let txConfirmOption = {
     skipPreflight: true,
@@ -123,7 +123,7 @@ async function placeOrders(connection, account, pickOrders){
             let amountIn, minAmountOut, amountInUI, minAmountOutUI;
             if (order.side === 0) { // Buy, Swap B get A
                 // Retry until transfer arrived
-                for (let i = 0; i < RETRY_AMOUNT; i ++){
+                for (let i = 0; i < RETRY_TIMES; i ++){
                     amountInUI = (await connection.getTokenAccountBalance(new solanaWeb3.PublicKey(user[order.market.tokenBName]), accountBalanceOption)).value.uiAmount;
                     if (parseFloat(amountInUI) > tokenRoughAmount * 0.8){break;}
                     let status;
@@ -143,7 +143,7 @@ async function placeOrders(connection, account, pickOrders){
                 tokenRoughAmount /= order.market.price;
             } else {  // Sell, Swap A get B
                 // Retry until transfer arrived
-                for (let i = 0; i < RETRY_AMOUNT; i ++){
+                for (let i = 0; i < RETRY_TIMES; i ++){
                     amountInUI = (await connection.getTokenAccountBalance(new solanaWeb3.PublicKey(user[order.market.tokenAName]), accountBalanceOption)).value.uiAmount;
                     if (parseFloat(amountInUI) > tokenRoughAmount * 0.8){break;}
                     let status;
@@ -177,7 +177,7 @@ async function placeOrdersSimple(connection, account, userAddress, pickOrders){
             let amountIn, minAmountOut, amountInUI, minAmountOutUI;
             if (order.side === 0) { // Buy, Swap B get A
                 // Retry until transfer arrived
-                for (let i = 0; i < RETRY_AMOUNT; i ++){
+                for (let i = 0; i < RETRY_TIMES; i ++){
                     amountInUI = order.size;
                     if (parseFloat(amountInUI) > tokenRoughAmount * 0.8){break;}
                     await timer(500);
@@ -191,7 +191,7 @@ async function placeOrdersSimple(connection, account, userAddress, pickOrders){
                 console.log("----- Order Step " + i + " Swap " + amountInUI + " " + order.market.tokenBName + " for > " + minAmountOutUI + " " + order.market.tokenAName + "at price" + order.market.price + " | " + Date(Date.now()));
             } else {  // Sell, Swap A get B
                 // Retry until transfer arrived
-                for (let i = 0; i < RETRY_AMOUNT; i ++){
+                for (let i = 0; i < RETRY_TIMES; i ++){
                     amountInUI = order.size;
                     if (parseFloat(amountInUI) > tokenRoughAmount * 0.8){break;}
                     await timer(500);

@@ -20,7 +20,7 @@ const markets = ["SOL/USDC", "ETH/USDC", "ETH/SOL"];
 const SLIPPAGE = 0.015;
 const ARB_THRESHOLD = 0.0111;
 const RETRY_AMOUNT = 60;
-const INIT_ROUGH_AMOUNT = 30;
+const INIT_ROUGH_AMOUNT = 0.2;
 
 
 let poolInfo = {};
@@ -229,9 +229,9 @@ async function checkLoopAndArb(poolInfo){
     if (!poolSanity){console.log("dirty pool"); return null;}
 
     let [v, pickOrders] = getLoopRatio(["ETH/SOL", "ETH/USDC", "SOL/USDC"], poolInfo, [0, 1, 0]);
-    // if (1-v > ARB_THRESHOLD / 2) {
-    //     console.log("SOL => ETH  ... " + v + ' | ' + Date(Date.now()));
-    // }
+    if (1-v > ARB_THRESHOLD / 2) {
+        console.log("SOL => ETH  ... " + v + ' | ' + Date(Date.now()));
+    }
     if (1 - v > ARB_THRESHOLD){
         console.log((v * 100).toFixed(4) + '%   | ' + Date(Date.now()));
         await placeOrders(pickOrders);
@@ -239,9 +239,9 @@ async function checkLoopAndArb(poolInfo){
 
 
     [v, pickOrders] = getLoopRatio(["SOL/USDC", "ETH/USDC", "ETH/SOL"], poolInfo, [1, 0, 1]);
-    // if (1-v > ARB_THRESHOLD / 2) {
-    //     console.log("SOL => USDC ... " + v + ' | ' + Date(Date.now()));
-    // }
+    if (1-v > ARB_THRESHOLD / 2) {
+        console.log("SOL => USDC ... " + v + ' | ' + Date(Date.now()));
+    }
 
     if (1 - v > ARB_THRESHOLD){
         console.log((v * 100).toFixed(4) + '%   | ' + Date(Date.now()));
